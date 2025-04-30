@@ -2,8 +2,8 @@ from bs4 import BeautifulSoup
 import requests
 import getpass
 
-school_num = getpass.getpass() #학번 입력
-pw = getpass.getpass() #개신누리 비밀번호 입력
+school_num = getpass.getpass("학번을 입력해주세요 : ") #학번 입력
+pw = getpass.getpass("비밀번호를 입력해주세요 : ") #개신누리 비밀번호 입력
 
 gaesin_url = "https://eis.cbnu.ac.kr/cbnuLogin"
 session = requests.Session()
@@ -18,11 +18,11 @@ payload = {
 respones = session.get(gaesin_url, data=payload) #개신누리 로그인
 
 if respones.ok:
-    print("ok")
+    print("로그인 성공")
     print(respones.status_code)
 
 else:
-    print("실패",respones.status_code)
+    print("로그인 실패",respones.status_code)
 
 
 
