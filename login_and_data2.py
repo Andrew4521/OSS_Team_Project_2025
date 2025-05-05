@@ -1,4 +1,4 @@
-#pip install selenium webdriver-manager time 설치
+#pip install selenium webdriver-manager time 설치 필요
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
