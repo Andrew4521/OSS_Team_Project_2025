@@ -33,7 +33,10 @@ driver.get("https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko#14295")
 time.sleep(10)
 
 #입학년도, 전공, 복수전공 가져와 저장
+#입학년도, 전공, 복수전공 가져와 저장
 majors = {
+    "학년":"",
+    "이수학기":"",
     "전공":"",
     "입학년도":"",
     "복수전공":"",
@@ -42,11 +45,21 @@ majors = {
 
 try:
 
-    for i in ["05","03","16"]: #데이터 가져와 위 딕셔너리에 저장
+    for i in ["11","12","05","03","16"]: #데이터 가져와 위 딕셔너리에 저장
         element = WebDriverWait(driver, 30).until(
         EC.visibility_of_element_located((By.XPATH, f'//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tpg_1.form.div_detail.form.edt_txt{i}:input"]'))
 )
-        if i == "05": #전공 저장
+        if i == "11": #학년 저장
+            grade = element.get_attribute("value")
+            print(grade)
+            majors["학년"] = grade
+
+        elif i == "12": #이수학기 저장
+            semester = element.get_attribute("value")
+            print(semester)
+            majors["이수학기"] = semester
+
+        elif i == "05": #전공 저장
             major = element.get_attribute("value")
             print(major)
             majors["전공"] = major
@@ -54,7 +67,7 @@ try:
         elif i == "03": #입학년도 저장
             welcome = element.get_attribute("value")
             print(welcome)
-            majors["입학년도"] = welcome
+            majors["교과적용년도"] = welcome
 
         else: #복수전공 시작년도와 복수전공을 나눠서 저장
             year_second_major = element.get_attribute("value")
