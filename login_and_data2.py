@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import getpass
 
 
 #최신 버전 크롬에 맞는 크롬드라이버 설치
@@ -21,8 +22,11 @@ driver.get("https://eis.cbnu.ac.kr/cbnuLogin")
 username_field = driver.find_element(By.NAME, "uid")
 password_field = driver.find_element(By.NAME, "pswd")
 
-username_field.send_keys("")  #실제 아이디 입력
-password_field.send_keys("")  #실제 비밀번호 입력
+id = getpass.getpass("학번을 입력해주세요 : ")
+pw = getpass.getpass("개신누리 비밀번호를 입력해주세요 : ")
+
+username_field.send_keys(f"{id}")  #실제 아이디 입력
+password_field.send_keys(f"{pw}")  #실제 비밀번호 입력
 password_field.send_keys(Keys.RETURN)  #엔터 키 입력
 time.sleep(20) #20초 대기
 
