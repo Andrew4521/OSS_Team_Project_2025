@@ -1,39 +1,28 @@
+#include <cstdlib> 
 #include <iostream>
-#include "Student.h"
 #include <fstream>
+#include "Student.h"
 #include <nlohmann/json.hpp>
-#include <windows.h>
-
-
-
-using json = nlohmann::json;
 
 int main() {
-    // 받아온 데이터 파일 열기
-    std::ifstream in("student.json");
-    if (!in.is_open()) {
-        std::cerr << "student.json 파일을 열 수 없습니다.\n";
+    // Python 스크립트를 실행하여 student.json 초기화 
+    if (std::system("python scraper.py") != 0) {
+        std::cerr << "Python 스크래핑 실패!" << std::endl;
         return 1;
     }
 
-    json j;
-    in >> j; 
+    // student.json 파일 열기
+    std::ifstream ifs("student.json");
 
-  // 받아온 데이터로 초기화
-    Student student(
-        j.at("major").get<std::string>(),
-        j.at("minMajor").get<int>(),
-        j.at("maxMajor").get<int>(),
-        j.at("completedMajor").get<int>(),
-        j.at("minGenEd").get<int>(),
-        j.at("maxGenEd").get<int>(),
-        j.at("completedGenEd").get<int>()
-    );
 
-    SetConsoleOutputCP(CP_UTF8);
-    std::ios::sync_with_stdio(false);
+    // JSON 파싱
+    nlohmann::json j;
+    ifs >> j;
 
-    std::cout << student.getMajor() << std::endl;
+    // student 생성
+    Student student(j);
+
+
 
     return 0;
 }
