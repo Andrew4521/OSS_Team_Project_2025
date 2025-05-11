@@ -35,7 +35,7 @@ button = WebDriverWait(driver, 10).until(
 button.click()
 time.sleep(10)
 
-# 요소가 로드될 때까지 기다림 (테이블 전체)
+#모든 데이터를 받아올 때 까지 기다림
 table_xpath = '//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tpg_3.form.grd_tpg3List.body"]'
 WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, table_xpath)))
 
@@ -55,29 +55,31 @@ def xpath_t_f(driver, xapth):
 is_xpath_row = xpath_t_f(driver, xpath)
 multi_list = []
 
-while is_xpath_row: #만약 XPATH가 존재한다면 해당 데이터를 가져오고 행렬요소를 하나씩 넘김
-    inner_list = []
+while is_xpath_row: #만약 XPATH가 존재한다면 해당 데이터를 가져오고 다음 행렬 위치 값을 XPATH에 넣어줌.
+    inner_list = [] #각 행을 저장할 리스트
 
     for i in range(10):
         element = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, xpath))
 )
+        
         inner_list.append(element.get_attribute("aria-label"))
         col += 1
 
-        if col > 10:
+        if col == 10: #열의 범위를 넘어가면 초기화
             col = 0
-
-        print(f"counting{col}")
+        
+        xpath = f'//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tpg_3.form.grd_tpg3List.body.gridrow_{row}.cell_{row}_{col}"]'
 
     multi_list.append(inner_list)
 
     row += 1
-    is_xpath_row = xpath_t_f(driver, xpath)
+    xpath = f'//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tpg_3.form.grd_tpg3List.body.gridrow_{row}.cell_{row}_{col}"]' #다음 요소의 XPATH 저장
+    is_xpath_row = xpath_t_f(driver, xpath) #존재유무 확인
     
 
 for i in multi_list:
     print(i)
 
-# 브라우저 닫기
+#브라우저 닫기
 driver.quit()
