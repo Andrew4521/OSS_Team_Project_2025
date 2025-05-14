@@ -84,7 +84,7 @@ try:
 except Exception as e:
     print(f"예외 {e}")
 
-# 추가
+# 수강한 강의 가져오는 부분
 button = WebDriverWait(driver, 10).until(
     EC.element_to_be_clickable((By.XPATH, '//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tabbutton_3"]'))
 )
@@ -137,8 +137,18 @@ while is_xpath_row: #만약 XPATH가 존재한다면 해당 데이터를 가져�
 for i in multi_list:
     print(i)
 
-#추가
+# multi_list 필터링
+filtered_courses = []
+for row in multi_list:
+    for tok in row:
+        tok = tok.strip()
+        if tok.startswith("교과목명"):
+            name = tok[len("교과목명"):].strip()
+            filtered_courses.append(name)
+            break
 
+
+# 학점 가져오는 부분
 button = WebDriverWait(driver, 10).until(
     EC.element_to_be_clickable((By.XPATH, '//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tabbutton_1"]'))
 )
@@ -232,7 +242,7 @@ def filter_unwanted(data: dict) -> dict:
             if not any(k.startswith(p) for p in unwanted)}
 
 student_data = filter_unwanted(student_data)
-student_data["수강강의"] = multi_list
+student_data["수강강의"] = filtered_courses
 
 # student.json 으로 덮어쓰기
 import json
