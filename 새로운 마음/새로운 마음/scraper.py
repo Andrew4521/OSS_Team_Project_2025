@@ -84,12 +84,67 @@ try:
 except Exception as e:
     print(f"예외 {e}")
 
+# 수강한 강의 가져오는 부분
+button = WebDriverWait(driver, 10).until(
+    EC.element_to_be_clickable((By.XPATH, '//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tabbutton_3"]'))
+)
+button.click()
+time.sleep(10)
+
+#모든 데이터를 받아올 때 까지 기다림
+table_xpath = '//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tpg_3.form.grd_tpg3List.body"]'
+WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, table_xpath)))
+
+row = 0
+col = 0
+xpath = f'//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tpg_3.form.grd_tpg3List.body.gridrow_{row}.cell_{row}_{col}"]'
+
+#XPATH 존재 우뮤 확인 함수
+def xpath_t_f(driver, xapth):
+    try:
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, xapth)))
+        return True
+
+    except:
+        return False
+    
+is_xpath_row = xpath_t_f(driver, xpath)
+multi_list = []
+
+while is_xpath_row: #만약 XPATH가 존재한다면 해당 데이터를 가져오고 다음 행렬 위치 값을 XPATH에 넣어줌.
+    inner_list = [] #각 행을 저장할 리스트
+
+    for i in range(10):
+        element = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, xpath))
+)
+        
+        inner_list.append(element.get_attribute("aria-label"))
+        col += 1
+
+        if col == 10: #열의 범위를 넘어가면 초기화
+            col = 0
+        
+        xpath = f'//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tpg_3.form.grd_tpg3List.body.gridrow_{row}.cell_{row}_{col}"]'
+
+    multi_list.append(inner_list)
+
+    row += 1
+    xpath = f'//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tpg_3.form.grd_tpg3List.body.gridrow_{row}.cell_{row}_{col}"]' #다음 요소의 XPATH 저장
+    is_xpath_row = xpath_t_f(driver, xpath) #존재유무 확인
+    
+
+for i in multi_list:
+    print(i)
+
+
+
 button = WebDriverWait(driver, 10).until(
     EC.element_to_be_clickable((By.XPATH, '//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tabbutton_1"]'))
 )
 button.click()
 
-#데이터 저장용 리스트
+# 학점 데이터 저장용 리스트
 sub_credit = []
 
 for i in range(1, 44):
