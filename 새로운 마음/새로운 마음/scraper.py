@@ -20,8 +20,8 @@ username_field = driver.find_element(By.NAME, "uid")
 password_field = driver.find_element(By.NAME, "pswd")
 
 #아이디, 비밀번호 입력
-id = getpass.getpass()
-pw = getpass.getpass()
+id = getpass.getpass("학번: ")
+pw = getpass.getpass("비밀번호: ")
 
 username_field.send_keys(f"{id}")  #실제 아이디 입력
 password_field.send_keys(f"{pw}")  #실제 비밀번호 입력
@@ -84,7 +84,7 @@ try:
 except Exception as e:
     print(f"예외 {e}")
 
-# 수강한 강의 가져오는 부분
+# 추가
 button = WebDriverWait(driver, 10).until(
     EC.element_to_be_clickable((By.XPATH, '//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tabbutton_3"]'))
 )
@@ -137,14 +137,14 @@ while is_xpath_row: #만약 XPATH가 존재한다면 해당 데이터를 가져�
 for i in multi_list:
     print(i)
 
-
+#추가
 
 button = WebDriverWait(driver, 10).until(
     EC.element_to_be_clickable((By.XPATH, '//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tabbutton_1"]'))
 )
 button.click()
 
-# 학점 데이터 저장용 리스트
+#데이터 저장용 리스트
 sub_credit = []
 
 for i in range(1, 44):
@@ -199,6 +199,7 @@ for entry in sub_credit:
         val = 0
     student_data[key] = val
 
+   
 # 필요없는 데이터 필터링
 def filter_unwanted(data: dict) -> dict:
     unwanted = [
@@ -231,6 +232,7 @@ def filter_unwanted(data: dict) -> dict:
             if not any(k.startswith(p) for p in unwanted)}
 
 student_data = filter_unwanted(student_data)
+student_data["수강강의"] = multi_list
 
 # student.json 으로 덮어쓰기
 import json
