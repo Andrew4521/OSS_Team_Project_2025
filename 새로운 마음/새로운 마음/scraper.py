@@ -34,7 +34,6 @@ time.sleep(10)
 
 
 #입학년도, 전공, 복수전공 가져와 저장
-#입학년도, 전공, 복수전공 가져와 저장
 majors = {
     "학년":"",
     "이수학기":"",
@@ -124,75 +123,64 @@ for k in sub_credit:
 driver.quit()
 
 
+# 새 딕셔너리 생성
+student_data = {}
 
-import json
+# majors
+student_data.update(majors)
 
-
-#student 딕셔너리 초기화
-student_json = {}
+# sub_credit
 for entry in sub_credit:
-    text  = entry.replace("\n", " ").strip()   
+    text  = entry.replace("\n", " ").strip()
     parts = text.split()
     if len(parts) < 2:
         continue
-
-    credit_str  = parts[-1]
-    key_tokens  = parts[:-1]
+    key_tokens = parts[:-1]
+    val_str    = parts[-1]
     key = "_".join(tok.strip() for tok in key_tokens)
-
     try:
-        credit = int(credit_str)
+        val = int(val_str)
     except ValueError:
-        credit = 0
+        val = 0
+    student_data[key] = val
 
-    student_json[key] = credit
+# 필요없는 데이터 필터링
+def filter_unwanted(data: dict) -> dict:
+    unwanted = [
+        "기준학점_교양[최소:0/최대:0]_OCU_기타",
+        "기준학점_일반_선택",
+        "기준학점_부전공_필수",
+        "기준학점_부전공_선택",
+        "기준학점_전공_교직_복수",
+        "기준학점_다전공1_교직_복수",
+        "기준학점_다전공2_선택",
+        "기준학점_다전공2_교직_복수",
+        "기준학점_다전공2_필수",
+        "기준학점_교직_이론",
+        "기준학점_교직_소양",
+        "기준학점_교직_교육실습I,Ⅱ_교육봉사",
+        "교양[최소:0/최대:0]_OCU_기타",
+        "일반_선택",
+        "전공_교직_복수",
+        "부전공_필수",
+        "부전공_선택",
+        "다전공1_교직_복수",
+        "다전공2_필수",
+        "다전공2_선택",
+        "다전공2_교직_복수",
+        "교직_이론",
+        "교직_소양",
+        "교직_교육실습I,Ⅱ_교육봉사",
+    ]
+    return {k: v for k, v in data.items()
+            if not any(k.startswith(p) for p in unwanted)}
 
-# student.json 파일로 덮어쓰기
-with open("student.json", "w", encoding="utf-8") as fp:
-    json.dump(student_json, fp, ensure_ascii=False, indent=2)
+student_data = filter_unwanted(student_data)
 
-
-
-
-# 필요 없는 데이터 필터링
-unwanted_prefixes = [
-    "기준학점_교양[최소:0/최대:0]_OCU_기타",
-    "기준학점_일반_선택",
-    "기준학점_부전공_필수",
-    "기준학점_부전공_선택",
-    "기준학점_전공_교직_복수",
-    "기준학점_다전공1_교직_복수",
-    "기준학점_다전공2_선택",
-    "기준학점_다전공2_교직_복수",
-    "기준학점_다전공2_필수",
-    "기준학점_교직_이론",
-    "기준학점_교직_소양",
-    "기준학점_교직_교육실습I,Ⅱ_교육봉사",
-    "교양[최소:0/최대:0]_OCU_기타",
-    "일반_선택",
-    "전공_교직_복수",
-    "부전공_필수",
-    "부전공_선택",
-    "다전공1_교직_복수",
-    "다전공2_필수",
-    "다전공2_선택",
-    "다전공2_교직_복수",
-    "교직_이론",
-    "교직_소양",
-    "교직_교육실습I,Ⅱ_교육봉사",
-]
-
-# 필터링
-filtered_json = {
-    k: v
-    for k, v in student_json.items()
-    if not any(k.startswith(pref) for pref in unwanted_prefixes)
-}
-
-# 다시 한번 student.json 파일로 덮어쓰기
+# student.json 으로 덮어쓰기
 import json
 with open("student.json", "w", encoding="utf-8") as fp:
-    json.dump(filtered_json, fp, ensure_ascii=False, indent=2)
+    json.dump(student_data, fp, ensure_ascii=False, indent=2)
 
 print("✅ student.json 생성 완료:")
-print(json.dumps(filtered_json, ensure_ascii=False, indent=2))
+print(json.dumps(student_data, ensure_ascii=False, indent=2))
