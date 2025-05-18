@@ -33,13 +33,13 @@ cell_width = GRID_WIDTH // len(DAYS)
 cell_height = GRID_HEIGHT // len(TIMES)
 
 # Sample timetable
-timetable = {(i,i): subj for i,subj in enumerate(['Math','English','Science','History','Art'])}
+from timetable_detailed import timetable_detailed
+timetable = {(d['day'], d['period']): d['name'] for d in timetable_detailed}
 
 # Credentials
 VALID_USERS={'user1':'pass123','admin':'admin'}
 
 # Load saved items
-# Load saved items (수정됨)
 if os.path.exists(DATA_FILE):
     with open(DATA_FILE, 'r', encoding='utf-8') as f:
         raw = json.load(f)
@@ -49,7 +49,6 @@ if os.path.exists(DATA_FILE):
             fixed_list = []
             for item in vlist:
                 if item[0] == 'alarm':
-                    # 문자열 → datetime 객체로 변환
                     dt = datetime.datetime.strptime(item[1], '%Y-%m-%d %H:%M')
                     fixed_list.append(('alarm', dt, item[2]))
                 else:
@@ -58,8 +57,6 @@ if os.path.exists(DATA_FILE):
 else:
     data_items = {}
 
-
-# InputBox for Unicode
 class InputBox:
     def __init__(self,x,y,w,h,placeholder='',is_password=False):
         self.rect=pygame.Rect(x,y,w,h)
@@ -84,7 +81,6 @@ class InputBox:
             s.blit(self.txt_surf,(self.rect.x+5,self.rect.y+5))
         pygame.draw.rect(s,self.color,self.rect,2)
 
-# Save function
 def save_data():
     serial = {}
     for k, v_list in data_items.items():
@@ -98,33 +94,58 @@ def save_data():
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(serial, f, ensure_ascii=False, indent=2)
 
-
-# Login boxes
 user_box=InputBox(300,200,200,40,'아이디 입력')
 pass_box=InputBox(300,250,200,40,'비밀번호',True)
 login_btn=pygame.Rect(350,300,100,40)
 
-# State
 logged_in=False
 selected_cell=None
 input_box=None
 add_btn=None
 close_btn=None
 
+tabs = ['기본 정보', '메모', '알람']
+current_tab = 0
+
+def draw_overlay(cell, mouse_event=None):
+    global current_tab
+    ox=(SCREEN_WIDTH-600)//2; oy=(SCREEN_HEIGHT-560)//2
+    pygame.draw.rect(screen,DARK_GRAY,(ox,oy,600,560))
+
+    for i, name in enumerate(tabs):
+        tab_rect = pygame.Rect(ox + 20 + i * 130, oy + 20, 120, 40)
+        pygame.draw.rect(screen, LIGHT_BLUE if current_tab == i else GRAY, tab_rect)
+        screen.blit(font.render(name, True, BLACK), (tab_rect.x + 10, tab_rect.y + 5))
+        if mouse_event and tab_rect.collidepoint(mouse_event.pos):
+            current_tab = i
+
+    subj_name = timetable[cell]
+    info = next((d for d in timetable_detailed if d['name']==subj_name and d['day']==cell[0] and d['period']==cell[1]), None)
+
+    if current_tab == 0 and info:
+        screen.blit(font.render(f"과목 코드: {info['code']}", True, WHITE), (ox+20, oy+80))
+        screen.blit(font.render(f"과목명: {info['name']}", True, WHITE), (ox+20, oy+120))
+        screen.blit(font.render(f"요일: {DAYS[info['day']]}", True, WHITE), (ox+20, oy+160))
+        screen.blit(font.render(f"교시: {info['period']+1}교시", True, WHITE), (ox+20, oy+200))
+        screen.blit(font.render(f"학점: {info['credit']}", True, WHITE), (ox+20, oy+240))
+    elif current_tab == 1:
+        screen.blit(font.render("메모:", True, WHITE), (ox+20, oy+80))
+    elif current_tab == 2:
+        screen.blit(font.render("알람:", True, WHITE), (ox+20, oy+80))
+
 running=True
 while running:
+    mouse_click_event = None
     for e in pygame.event.get():
         if e.type==pygame.QUIT:
             save_data()
             running=False
-        # Login events
         if not logged_in:
             user_box.handle_event(e)
             pass_box.handle_event(e)
             if e.type==pygame.MOUSEBUTTONDOWN and login_btn.collidepoint(e.pos):
                 if VALID_USERS.get(user_box.text)==pass_box.text:
                     logged_in=True
-        # Select cell
         elif logged_in and selected_cell is None and e.type==pygame.MOUSEBUTTONDOWN:
             x,y=e.pos
             if GRID_LEFT<x<GRID_LEFT+GRID_WIDTH and GRID_TOP<y<GRID_TOP+GRID_HEIGHT:
@@ -136,10 +157,10 @@ while running:
                     input_box=InputBox(ox+20,oy+400,560,40,'이름:내용 또는 이름: YYYY-MM-DD HH:MM')
                     add_btn=pygame.Rect(ox+20,oy+440,120,40)
                     close_btn=pygame.Rect(ox+240,oy+520,100,40)
-        # Input overlay events
         elif selected_cell:
             input_box.handle_event(e)
             if e.type==pygame.MOUSEBUTTONDOWN:
+                mouse_click_event = e
                 if add_btn.collidepoint(e.pos) and input_box.text:
                     text=input_box.text
                     try:
@@ -157,7 +178,6 @@ while running:
                     input_box.txt_surf=font.render('',True,input_box.color)
                 if close_btn.collidepoint(e.pos):
                     selected_cell=None
-    # Draw
     screen.fill(WHITE)
     if not logged_in:
         screen.blit(font.render('Login',True,BLACK),(360,150))
@@ -166,7 +186,6 @@ while running:
         pygame.draw.rect(screen,LIGHT_BLUE,login_btn)
         screen.blit(font.render('Login',True,BLACK),(login_btn.x+20,login_btn.y+5))
     else:
-        # Draw grid
         pygame.draw.rect(screen,GRAY,(GRID_LEFT,GRID_TOP,GRID_WIDTH,GRID_HEIGHT),2)
         for i,day in enumerate(DAYS):
             x=GRID_LEFT+i*cell_width
@@ -176,26 +195,12 @@ while running:
             y=GRID_TOP+j*cell_height
             pygame.draw.line(screen,GRAY,(GRID_LEFT,y),(GRID_LEFT+GRID_WIDTH,y))
             screen.blit(font.render(time,True,BLACK),(GRID_LEFT-80,y+cell_height//2-10))
-        # Draw subjects
         for (c,r),subj in timetable.items():
             rct=pygame.Rect(GRID_LEFT+c*cell_width+1,GRID_TOP+r*cell_height+1,cell_width-2,cell_height-2)
             pygame.draw.rect(screen,BLUE,rct)
             screen.blit(font.render(subj,True,WHITE),(rct.x+5,rct.y+5))
-        # Overlay
         if selected_cell:
-            ox=(SCREEN_WIDTH-600)//2; oy=(SCREEN_HEIGHT-560)//2
-            pygame.draw.rect(screen,DARK_GRAY,(ox,oy,600,560))
-            screen.blit(font.render(f"Subject: {timetable[selected_cell]}",True,WHITE),(ox+20,oy+20))
-            # Display items
-            screen.blit(small_font.render('Items:',True,WHITE),(ox+20,oy+60))
-            for idx,it in enumerate(data_items.get(selected_cell,[])):
-                y=oy+80+idx*24
-                if it[0]=='memo':
-                    txt=f"- {it[1]}: {it[2]}"
-                else:
-                    txt=f"- {it[2]} @ {it[1].strftime('%Y-%m-%d %H:%M')}"
-                screen.blit(small_font.render(txt,True,WHITE),(ox+40,y))
-            # Input & buttons
+            draw_overlay(selected_cell, mouse_click_event)
             input_box.draw(screen)
             pygame.draw.rect(screen,LIGHT_BLUE,add_btn)
             screen.blit(font.render('Add',True,BLACK),(add_btn.x+30,add_btn.y+5))
@@ -203,7 +208,6 @@ while running:
             screen.blit(font.render('Close',True,BLACK),(close_btn.x+10,close_btn.y+5))
     pygame.display.flip()
 
-# Cleanup
 pygame.key.stop_text_input()
 pygame.quit()
 sys.exit()
