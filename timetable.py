@@ -128,10 +128,14 @@ def draw_overlay(cell, mouse_event=None):
         screen.blit(font.render(f"요일: {DAYS[info['day']]}", True, WHITE), (ox+20, oy+160))
         screen.blit(font.render(f"교시: {info['period']+1}교시", True, WHITE), (ox+20, oy+200))
         screen.blit(font.render(f"학점: {info['credit']}", True, WHITE), (ox+20, oy+240))
-    elif current_tab == 1:
-        screen.blit(font.render("메모:", True, WHITE), (ox+20, oy+80))
-    elif current_tab == 2:
-        screen.blit(font.render("알람:", True, WHITE), (ox+20, oy+80))
+    else:
+        items = data_items.get(cell, [])
+        for idx, it in enumerate(items):
+            y = oy + 80 + idx * 24
+            if it[0] == 'memo' and current_tab == 1:
+                screen.blit(small_font.render(f"- {it[1]}: {it[2]}", True, WHITE), (ox + 40, y))
+            elif it[0] == 'alarm' and current_tab == 2:
+                screen.blit(small_font.render(f"- {it[2]} @ {it[1].strftime('%Y-%m-%d %H:%M')}", True, WHITE), (ox + 40, y))
 
 running=True
 while running:
@@ -161,23 +165,24 @@ while running:
             input_box.handle_event(e)
             if e.type==pygame.MOUSEBUTTONDOWN:
                 mouse_click_event = e
-                if add_btn.collidepoint(e.pos) and input_box.text:
-                    text=input_box.text
-                    try:
-                        key,val=text.split(':',1)
-                        name,content=key.strip(),val.strip()
+                if current_tab != 0:
+                    if add_btn.collidepoint(e.pos) and input_box.text:
+                        text=input_box.text
                         try:
-                            dt=datetime.datetime.strptime(content,'%Y-%m-%d %H:%M')
-                            item=('alarm',dt,name)
-                        except:
-                            item=('memo',name,content)
-                        data_items.setdefault(selected_cell,[]).append(item)
-                    except ValueError:
-                        pass
-                    input_box.text=''
-                    input_box.txt_surf=font.render('',True,input_box.color)
-                if close_btn.collidepoint(e.pos):
-                    selected_cell=None
+                            key,val=text.split(':',1)
+                            name,content=key.strip(),val.strip()
+                            try:
+                                dt=datetime.datetime.strptime(content,'%Y-%m-%d %H:%M')
+                                item=('alarm',dt,name)
+                            except:
+                                item=('memo',name,content)
+                            data_items.setdefault(selected_cell,[]).append(item)
+                        except ValueError:
+                            pass
+                        input_box.text=''
+                        input_box.txt_surf=font.render('',True,input_box.color)
+                    if close_btn.collidepoint(e.pos):
+                        selected_cell=None
     screen.fill(WHITE)
     if not logged_in:
         screen.blit(font.render('Login',True,BLACK),(360,150))
@@ -201,9 +206,10 @@ while running:
             screen.blit(font.render(subj,True,WHITE),(rct.x+5,rct.y+5))
         if selected_cell:
             draw_overlay(selected_cell, mouse_click_event)
-            input_box.draw(screen)
-            pygame.draw.rect(screen,LIGHT_BLUE,add_btn)
-            screen.blit(font.render('Add',True,BLACK),(add_btn.x+30,add_btn.y+5))
+            if current_tab != 0:
+                input_box.draw(screen)
+                pygame.draw.rect(screen,LIGHT_BLUE,add_btn)
+                screen.blit(font.render('Add',True,BLACK),(add_btn.x+30,add_btn.y+5))
             pygame.draw.rect(screen,LIGHT_BLUE,close_btn)
             screen.blit(font.render('Close',True,BLACK),(close_btn.x+10,close_btn.y+5))
     pygame.display.flip()
