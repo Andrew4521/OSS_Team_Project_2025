@@ -7,6 +7,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import getpass
+from selenium.webdriver.common.action_chains import ActionChains
 
 #최신 버전 크롬에 맞는 크롬드라이버 설치
 service = Service(ChromeDriverManager(driver_version="136.0.7103.49").install())
@@ -19,13 +20,13 @@ driver.get("https://eis.cbnu.ac.kr/cbnuLogin")
 username_field = driver.find_element(By.NAME, "uid")
 password_field = driver.find_element(By.NAME, "pswd")
 
-#아이디, 비밀번호 입력
 id = getpass.getpass()
 pw = getpass.getpass()
 
 username_field.send_keys(f"{id}")  #실제 아이디 입력
 password_field.send_keys(f"{pw}")  #실제 비밀번호 입력
-password_field.send_keys(Keys.RETURN)  #엔터 키 입력time.sleep(20) #20초 대기
+password_field.send_keys(Keys.RETURN)  #엔터 키 입력
+time.sleep(20) #20초 대기
 
 #로그인 후 학점 이수 내역 페이지로 이동
 driver.get("https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko#14295")
@@ -35,7 +36,7 @@ button = WebDriverWait(driver, 10).until(
 button.click()
 time.sleep(10)
 
-#모든 데이터를 받아올 때 까지 기다림
+# 요소가 로드될 때까지 기다림 (테이블 전체)
 table_xpath = '//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tpg_3.form.grd_tpg3List.body"]'
 WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, table_xpath)))
 
