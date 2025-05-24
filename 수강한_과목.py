@@ -40,6 +40,15 @@ time.sleep(10)
 table_xpath = '//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tpg_3.form.grd_tpg3List.body"]'
 WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, table_xpath)))
 
+#웹 페이지 크기를 줄여 모든 요소 표시
+actions = ActionChains(driver)
+driver.switch_to.window(driver.current_window_handle)
+
+for i in range(7):
+    pyautogui.hotkey('ctrl', '-')
+    time.sleep(2)
+
+
 row = 0
 col = 0
 xpath = f'//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tpg_3.form.grd_tpg3List.body.gridrow_{row}.cell_{row}_{col}"]'
