@@ -27,7 +27,6 @@ pw = getpass.getpass()
 username_field.send_keys(f"{id}")  #실제 아이디 입력
 password_field.send_keys(f"{pw}")  #실제 비밀번호 입력
 password_field.send_keys(Keys.RETURN)  #엔터 키 입력
-time.sleep(20) #20초 대기
 
 login_xpath = '//*[@id="mainframe.login.form.btn_yes"]'
 
@@ -42,7 +41,6 @@ time.sleep(5)
 
 #로그인 후 학점 이수 내역 페이지로 이동
 driver.get("https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko#14295")
-time.sleep(10)
 
 majors = {
     "학년":"",
@@ -142,7 +140,6 @@ driver.switch_to.window(driver.current_window_handle)
 
 for i in range(7):
     pyautogui.hotkey('ctrl', '-')
-    time.sleep(2)
 
 row = 0
 col = 0
