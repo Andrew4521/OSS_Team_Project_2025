@@ -141,3 +141,11 @@ def load_courses_from_file(fname: str) -> list[Course]:
 
     all_courses = [Course(item) for item in arr]
     return [c for c in all_courses if not is_weekend_course(c)]
+
+def is_conflict(a: Course, b: Course) -> bool:
+    """a, b 두 강의가 동일 요일+교시를 공유하면 True."""
+    for t1 in a.times:
+        for t2 in b.times:
+            if t1.day == t2.day and t1.slot == t2.slot:
+                return True
+    return False
