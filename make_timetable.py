@@ -66,6 +66,7 @@ def second_major_prefix(self):
      yy = 25
      return f"{self.second_major_prefix()}{yy}_{self.semester}.json"
 
+# 2) Course & TimeSlot 클래스
 class TimeSlot:
     def __init__(self, day: str, slot: int):
         self.day = day
@@ -118,3 +119,11 @@ class Course:
 
     def __repr__(self):
         return f"<Course {self.code} {self.name} ({self.category}, {self.credits}학점) [{self.raw_time}]>"
+
+# 3) 주말(토/일) 강의 제외 
+def is_weekend_course(course: Course) -> bool:
+    """course.times에 '토' 또는 '일'이 하나라도 있으면 True."""
+    for t in course.times:
+        if t.day in ("토", "일"):
+            return True
+    return False
