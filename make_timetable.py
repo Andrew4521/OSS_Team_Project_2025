@@ -192,3 +192,14 @@ def schedule_major_required(student: Student, second: bool=False) -> list[Course
         return []
     all_major = load_courses_from_file(fname)
     return filter_by_year_and_category(all_major, student.grade, "전공필수")
+
+def schedule_major_elective(student: Student, second: bool=False) -> list[Course]:
+    """
+    전공 선택(주전공 or 복수전공) 리스트 반환.
+    """
+    fname = student.second_major_filename() if second else student.major_filename()
+    if not fname:
+        return []
+    all_major = load_courses_from_file(fname)
+    return filter_by_year_and_category(all_major, student.grade, "전공선택")
+
