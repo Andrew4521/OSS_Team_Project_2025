@@ -281,4 +281,14 @@ if student.doubleMajor:
             timetable.append(c)
             scheduled_codes.add(c.code)
 
+    # ── 4-3) 교양 과목 추가 ──
+for c in schedule_general_education(student):
+    if c.name in student.taken_courses:
+        continue
+    if c.code in scheduled_codes:
+        continue
+    if not has_conflict(c, timetable):
+        timetable.append(c)
+        scheduled_codes.add(c.code)
+
 
