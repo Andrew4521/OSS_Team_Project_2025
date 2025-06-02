@@ -127,3 +127,17 @@ def is_weekend_course(course: Course) -> bool:
         if t.day in ("토", "일"):
             return True
     return False
+
+# 4) 스케줄러 함수들
+def load_courses_from_file(fname: str) -> list[Course]:
+    """
+    JSON 배열 파일 열어서 Course 리스트로 반환.
+    """
+    path = Path(fname)
+    if not path.exists():
+        raise FileNotFoundError(f"파일이 존재하지 않음: {fname}")
+    with open(path, encoding="utf-8") as fp:
+        arr = json.load(fp)
+
+    all_courses = [Course(item) for item in arr]
+    return [c for c in all_courses if not is_weekend_course(c)]
