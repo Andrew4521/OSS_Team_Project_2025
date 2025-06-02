@@ -80,23 +80,41 @@ class Course:
         # ── 과목코드 저장 ──
         raw_code = data.get("과목코드", "")
         self.code = str(raw_code).strip()
-         # ── 학년 파싱  ──
-     h = data.get("학년", "").strip()
-     if h.endswith("학년"):
-         num_part = h[:-len("학년")]
-         self.year = int(num_part) if num_part.isdigit() else 0
-     else:
-         self.year = int(h) if h.isdigit() else 0
+
+        # ── 학년 파싱  ──
+        h = data.get("학년", "").strip()
+        if h.endswith("학년"):
+            num_part = h[:-len("학년")]
+            self.year = int(num_part) if num_part.isdigit() else 0
+        else:
+            self.year = int(h) if h.isdigit() else 0
 
         # ── 나머지 필드 ──
-    self.category = data.get("이수구분", "").strip()
-    self.name     = data.get("과목명", "").strip()
-    self.credits  = int(data.get("학점", 0))
+        self.category = data.get("이수구분", "").strip()
+        self.name     = data.get("과목명", "").strip()
+        self.credits  = int(data.get("학점", 0))
 
-    raw_time = data.get("수업시간", "").strip()
-    self.raw_time = raw_time  # 출력용 원본 수업시간
+        raw_time = data.get("수업시간", "").strip()
+        self.raw_time = raw_time  # 출력용 원본 수업시간
 
         # ── 대괄호 제거 (강의실 정보 등) ──
-     no_brackets = re.sub(r"\[.*?\]", "", raw_time)
+        no_brackets = re.sub(r"\[.*?\]", "", raw_time)
 
+        # ── 요일-교시 매핑 ──
+        tokens = no_brackets.split()
+        self.times = []
+        current_day = None
+        for tok in tokens:
+            if tok in ("월", "화", "수", "목", "금", "토", "일"):
+                current_day = tok
+            else:
+                parts = tok.split(",")
+                for p in parts:
+                    p = p.strip()
+                    if p.isdigit():
+                        slot = int(p)
+                        if current_day:
+                            self.times.append(TimeSlot(current_day, slot))
 
+    def __repr__(self):
+        return f"<Course {self.code} {self.name} ({self.category}, {self.credits}학점) [{self.raw_time}]>"
