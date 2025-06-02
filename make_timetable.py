@@ -332,3 +332,14 @@ if student.doubleMajor:
             current = new_sum
             if current >= MIN_CR:
                 break
+
+    # 5) 최종 시간표 출력
+    print("\n=== 생성된 시간표 ===\n")
+    for c in timetable:
+        print(f"{c.code} {c.name} ({c.category}, {c.credits}학점) → {c.raw_time}")
+    print(f"\n총 학점: {sum_credits(timetable)}\n")
+
+
+if __name__ == "__main__":
+    main()
+
