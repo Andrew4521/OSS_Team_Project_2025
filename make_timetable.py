@@ -25,3 +25,15 @@ class Student:
       "SecondMajorElective": int(data.get("다전공1_선택", 0)),
   }
 
+ # ── 요구 학점(rq_credit) ──
+ self.rq_credit = {
+     "GenEdCommonCore":     int(data.get("기준학점_교양[최소:0/최대:0]_공통_기초", 0)),
+     "GenEdNaturalCore":    int(data.get("기준학점_교양[최소:0/최대:0]_자연_기초", 0)),
+     "GenEdAdvanced":       int(data.get("기준학점_교양[최소:0/최대:0]_심화", 0)),
+     "GenEdSpecialized":    int(data.get("기준학점_교양[최소:0/최대:0]_특성", 0)),
+     "MajorCore":           int(data.get("기준학점_전공_필수", 0)),
+     "MajorElective":       int(data.get("기준학점_전공_선택", 0)),
+     "SecondMajorCore":     int(data.get("기준학점_다전공1_필수", 0)),
+     "SecondMajorElective": int(data.get("기준학점_다전공1_선택", 0)),
+ }
+
