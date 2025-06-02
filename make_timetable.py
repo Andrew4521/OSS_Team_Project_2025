@@ -149,3 +149,10 @@ def is_conflict(a: Course, b: Course) -> bool:
             if t1.day == t2.day and t1.slot == t2.slot:
                 return True
     return False
+
+def has_conflict(c: Course, scheduled: list[Course]) -> bool:
+    """이미 스케줄된 강의(scheduled) 중 하나라도 c와 충돌하면 True."""
+    for sc in scheduled:
+        if is_conflict(c, sc):
+            return True
+    return False
