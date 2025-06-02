@@ -80,5 +80,12 @@ class Course:
         # ── 과목코드 저장 ──
         raw_code = data.get("과목코드", "")
         self.code = str(raw_code).strip()
+         # ── 학년 파싱  ──
+     h = data.get("학년", "").strip()
+     if h.endswith("학년"):
+         num_part = h[:-len("학년")]
+         self.year = int(num_part) if num_part.isdigit() else 0
+     else:
+         self.year = int(h) if h.isdigit() else 0
 
 
