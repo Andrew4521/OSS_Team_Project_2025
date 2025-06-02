@@ -250,3 +250,22 @@ def main():
             student.semester = int(term)
             break
         print("올바른 숫자(1 또는 2)를 입력해 주세요.")
+
+# 3) 빈 시간표 리스트 & 이미 추가된 과목코드 집합 생성
+    timetable: list[Course] = []
+    scheduled_codes: set[str] = set()
+
+
+ # ── 4-1) 주전공 전공 필수 추가 ──
+ for c in schedule_major_required(student, second=False):
+     # ① 이미 수강한 과목 필터링
+     if c.name in student.taken_courses:
+         continue
+     # ② 과목 코드 중복 필터링
+     if c.code in scheduled_codes:
+         continue
+     # ③ 시간 충돌 검사
+     if not has_conflict(c, timetable):
+         timetable.append(c)
+         scheduled_codes.add(c.code)
+
