@@ -56,3 +56,13 @@ def second_major_prefix(self):
         if dm == "경영학과":     return "MA_"
         raise ValueError(f"지원하지 않는 복수전공: '{dm}'")
 
+ def major_filename(self):
+     yy = 25
+     return f"{self.major_prefix()}{yy}_{self.semester}.json"
+
+ def second_major_filename(self):
+     if not self.doubleMajor:
+         return ""
+     yy = 25
+     return f"{self.second_major_prefix()}{yy}_{self.semester}.json"
+
