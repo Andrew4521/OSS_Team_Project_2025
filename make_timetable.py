@@ -236,3 +236,9 @@ def schedule_general_education(student: Student) -> list[Course]:
         schedule.extend(chosen)
 
     return schedule
+
+def main():
+    # 1) scraper.py로 student.json이 이미 생성됐다고 가정, student.json 사용하여 Student 클래스 초기화
+    with open("student.json", encoding="utf-8-sig") as fp:
+        student_data = json.load(fp)
+    student = Student(student_data)
