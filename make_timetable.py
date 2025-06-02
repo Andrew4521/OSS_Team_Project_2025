@@ -167,3 +167,18 @@ def filter_by_year_and_category(courses: list[Course], year: int, category: str)
     """
     return [c for c in courses if (c.year == year or c.year == 0) and c.category == category]
 
+def select_random(candidates: list[Course], need: int) -> list[Course]:
+    """
+    candidates에서 need학점이 될 때까지 무작위로 반환.
+    """
+    pool = candidates.copy()
+    random.shuffle(pool)
+    chosen = []
+    total = 0
+    for c in pool:
+        if total >= need:
+            break
+        chosen.append(c)
+        total += c.credits
+    return chosen
+
