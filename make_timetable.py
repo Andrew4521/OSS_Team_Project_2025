@@ -74,3 +74,11 @@ class TimeSlot:
     def __repr__(self):
         return f"{self.day}{self.slot}"
 
+
+class Course:
+    def __init__(self, data: dict):
+        # ── 과목코드 저장 ──
+        raw_code = data.get("과목코드", "")
+        self.code = str(raw_code).strip()
+
+
