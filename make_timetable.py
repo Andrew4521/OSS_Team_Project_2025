@@ -156,3 +156,14 @@ def has_conflict(c: Course, scheduled: list[Course]) -> bool:
         if is_conflict(c, sc):
             return True
     return False
+
+def sum_credits(scheduled: list[Course]) -> int:
+    """시간표에 들어간 모든 강의의 학점 합."""
+    return sum(c.credits for c in scheduled)
+
+def filter_by_year_and_category(courses: list[Course], year: int, category: str) -> list[Course]:
+    """
+    학년(year) 또는 '전학년'(year=0)이고, 이수구분(category)이 일치하는 과목만 반환.
+    """
+    return [c for c in courses if (c.year == year or c.year == 0) and c.category == category]
+
