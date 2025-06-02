@@ -242,3 +242,11 @@ def main():
     with open("student.json", encoding="utf-8-sig") as fp:
         student_data = json.load(fp)
     student = Student(student_data)
+
+    # 2) “학기 선택” 
+    while True:
+        term = input("현재 학기를 선택하세요 (1 또는 2): ").strip()
+        if term in ("1", "2"):
+            student.semester = int(term)
+            break
+        print("올바른 숫자(1 또는 2)를 입력해 주세요.")
