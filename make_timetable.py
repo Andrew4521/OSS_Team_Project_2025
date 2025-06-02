@@ -37,3 +37,12 @@ class Student:
      "SecondMajorElective": int(data.get("기준학점_다전공1_선택", 0)),
  }
 
+
+def major_prefix(self):
+        m = self.major
+        if m == "컴퓨터공학과": return "CP_"
+        if m == "천문학과":     return "AS_"
+        if m == "철학과":       return "PH_"
+        if m == "경영학과":     return "MA_"
+        raise ValueError(f"지원하지 않는 전공(주전공): '{m}'")
+
