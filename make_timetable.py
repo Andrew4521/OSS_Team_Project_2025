@@ -88,4 +88,15 @@ class Course:
      else:
          self.year = int(h) if h.isdigit() else 0
 
+        # ── 나머지 필드 ──
+    self.category = data.get("이수구분", "").strip()
+    self.name     = data.get("과목명", "").strip()
+    self.credits  = int(data.get("학점", 0))
+
+    raw_time = data.get("수업시간", "").strip()
+    self.raw_time = raw_time  # 출력용 원본 수업시간
+
+        # ── 대괄호 제거 (강의실 정보 등) ──
+     no_brackets = re.sub(r"\[.*?\]", "", raw_time)
+
 
