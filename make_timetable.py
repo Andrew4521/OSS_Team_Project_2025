@@ -66,3 +66,11 @@ def second_major_prefix(self):
      yy = 25
      return f"{self.second_major_prefix()}{yy}_{self.semester}.json"
 
+class TimeSlot:
+    def __init__(self, day: str, slot: int):
+        self.day = day
+        self.slot = slot
+
+    def __repr__(self):
+        return f"{self.day}{self.slot}"
+
