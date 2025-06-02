@@ -251,23 +251,23 @@ def main():
             break
         print("올바른 숫자(1 또는 2)를 입력해 주세요.")
 
-# 3) 빈 시간표 리스트 & 이미 추가된 과목코드 집합 생성
-    timetable: list[Course] = []
-    scheduled_codes: set[str] = set()
+    # 3) 빈 시간표 리스트 & 이미 추가된 과목코드 집합 생성
+        timetable: list[Course] = []
+        scheduled_codes: set[str] = set()
 
 
- # ── 4-1) 주전공 전공 필수 추가 ──
- for c in schedule_major_required(student, second=False):
-     # ① 이미 수강한 과목 필터링
-     if c.name in student.taken_courses:
-         continue
-     # ② 과목 코드 중복 필터링
+     # ── 4-1) 주전공 전공 필수 추가 ──
+     for c in schedule_major_required(student, second=False):
+         # ① 이미 수강한 과목 필터링
+         if c.name in student.taken_courses:
+             continue
+         # ② 과목 코드 중복 필터링
      if c.code in scheduled_codes:
          continue
      # ③ 시간 충돌 검사
-     if not has_conflict(c, timetable):
-         timetable.append(c)
-         scheduled_codes.add(c.code)
+         if not has_conflict(c, timetable):
+             timetable.append(c)
+             scheduled_codes.add(c.code)
 
 
     # ── 4-2) 복수전공 전공 필수 추가 (복수전공 있으면) ──
@@ -282,13 +282,33 @@ if student.doubleMajor:
             scheduled_codes.add(c.code)
 
     # ── 4-3) 교양 과목 추가 ──
-for c in schedule_general_education(student):
-    if c.name in student.taken_courses:
-        continue
-    if c.code in scheduled_codes:
-        continue
-    if not has_conflict(c, timetable):
-        timetable.append(c)
-        scheduled_codes.add(c.code)
+    for c in schedule_general_education(student):
+        if c.name in student.taken_courses:
+            continue
+        if c.code in scheduled_codes:
+            continue
+        if not has_conflict(c, timetable):
+            timetable.append(c)
+            scheduled_codes.add(c.code)
 
-
+      # ── 4-4) 주전공 전공 선택 추가 ──
+    current = sum_credits(timetable)
+    MIN_CR, MAX_CR = 18, 21
+    if current < MIN_CR:
+        candidates = schedule_major_elective(student, second=False)
+        random.shuffle(candidates)
+        for c in candidates:
+            if c.name in student.taken_courses:
+                continue
+            if c.code in scheduled_codes:
+                continue
+            new_sum = current + c.credits
+            if new_sum > MAX_CR:
+                continue
+            if has_conflict(c, timetable):
+                continue
+            timetable.append(c)
+            scheduled_codes.add(c.code)
+            current = new_sum
+            if current >= MIN_CR:
+                break
