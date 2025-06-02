@@ -203,3 +203,14 @@ def schedule_major_elective(student: Student, second: bool=False) -> list[Course
     all_major = load_courses_from_file(fname)
     return filter_by_year_and_category(all_major, student.grade, "전공선택")
 
+def schedule_general_education(student: Student) -> list[Course]:
+
+    schedule = []
+
+    # 공통 기초
+    need = student.rq_credit["GenEdCommonCore"] - student.cp_credit["GenEdCommonCore"]
+    if need > 0:
+        pool = load_courses_from_file("GE_Common.json")
+        chosen = select_random(pool, need)
+        schedule.extend(chosen)
+
