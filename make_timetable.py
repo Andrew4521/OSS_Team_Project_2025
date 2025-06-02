@@ -312,3 +312,23 @@ if student.doubleMajor:
             current = new_sum
             if current >= MIN_CR:
                 break
+
+    # ── 4-5) 복수전공 전공 선택 추가 (복수전공 있으면 + 필요시) ──
+    if student.doubleMajor and current < MIN_CR:
+        candidates = schedule_major_elective(student, second=True)
+        random.shuffle(candidates)
+        for c in candidates:
+            if c.name in student.taken_courses:
+                continue
+            if c.code in scheduled_codes:
+                continue
+            new_sum = current + c.credits
+            if new_sum > MAX_CR:
+                continue
+            if has_conflict(c, timetable):
+                continue
+            timetable.append(c)
+            scheduled_codes.add(c.code)
+            current = new_sum
+            if current >= MIN_CR:
+                break
