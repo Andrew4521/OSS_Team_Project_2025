@@ -227,3 +227,12 @@ def schedule_general_education(student: Student) -> list[Course]:
         pool = load_courses_from_file("GE_Advanced.json")
         chosen = select_random(pool, need)
         schedule.extend(chosen)
+
+    # 특성
+    need = student.rq_credit["GenEdSpecialized"] - student.cp_credit["GenEdSpecialized"]
+    if need > 0:
+        pool = load_courses_from_file("GE_Specialized.json")
+        chosen = select_random(pool, need)
+        schedule.extend(chosen)
+
+    return schedule
