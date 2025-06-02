@@ -46,3 +46,13 @@ def major_prefix(self):
         if m == "경영학과":     return "MA_"
         raise ValueError(f"지원하지 않는 전공(주전공): '{m}'")
 
+def second_major_prefix(self):
+        dm = self.doubleMajor
+        if dm == "": 
+            return ""
+        if dm == "컴퓨터공학과": return "CP_"
+        if dm == "천문학과":     return "AS_"
+        if dm == "철학과":       return "PH_"
+        if dm == "경영학과":     return "MA_"
+        raise ValueError(f"지원하지 않는 복수전공: '{dm}'")
+
