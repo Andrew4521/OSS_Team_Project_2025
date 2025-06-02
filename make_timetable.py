@@ -269,3 +269,16 @@ def main():
          timetable.append(c)
          scheduled_codes.add(c.code)
 
+
+    # ── 4-2) 복수전공 전공 필수 추가 (복수전공 있으면) ──
+if student.doubleMajor:
+    for c in schedule_major_required(student, second=True):
+        if c.name in student.taken_courses:
+            continue
+        if c.code in scheduled_codes:
+            continue
+        if not has_conflict(c, timetable):
+            timetable.append(c)
+            scheduled_codes.add(c.code)
+
+
