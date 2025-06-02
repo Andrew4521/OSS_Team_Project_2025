@@ -1,3 +1,8 @@
+import json
+import random
+import re
+from pathlib import Path
+
 # 1) Student 클래스 정의 
 class Student:
     def __init__(self, data):
@@ -10,35 +15,37 @@ class Student:
         self.major = data.get("전공", "").strip()
         self.doubleMajor = data.get("복수전공", "").strip()
         self.curriculumYear = int(data.get("교과적용년도", "0").strip())
-           # ── 이미 수강한 강의 목록 ──
+                # ── 이미 수강한 강의 목록 ──
         self.taken_courses = data.get("수강강의", [])
 
-  # ── 이수 학점(cp_credit) ──
-  self.cp_credit = {
-      "GenEdCommonCore":     int(data.get("교양[최소:0/최대:0]_공통_기초", 0)),
-      "GenEdNaturalCore":    int(data.get("교양[최소:0/최대:0]_자연_기초", 0)),
-      "GenEdAdvanced":       int(data.get("교양[최소:0/최대:0]_심화", 0)),
-      "GenEdSpecialized":    int(data.get("교양[최소:0/최대:0]_특성", 0)),
-      "MajorCore":           int(data.get("전공_필수", 0)),
-      "MajorElective":       int(data.get("전공_선택", 0)),
-      "SecondMajorCore":     int(data.get("다전공1_필수", 0)),
-      "SecondMajorElective": int(data.get("다전공1_선택", 0)),
-  }
+        # ── 이수 학점(cp_credit) ──
+        self.cp_credit = {
+            "GenEdCommonCore":     int(data.get("교양[최소:0/최대:0]_공통_기초", 0)),
+            "GenEdNaturalCore":    int(data.get("교양[최소:0/최대:0]_자연_기초", 0)),
+            "GenEdAdvanced":       int(data.get("교양[최소:0/최대:0]_심화", 0)),
+            "GenEdSpecialized":    int(data.get("교양[최소:0/최대:0]_특성", 0)),
+            "MajorCore":           int(data.get("전공_필수", 0)),
+            "MajorElective":       int(data.get("전공_선택", 0)),
+            "SecondMajorCore":     int(data.get("다전공1_필수", 0)),
+            "SecondMajorElective": int(data.get("다전공1_선택", 0)),
+        }
 
- # ── 요구 학점(rq_credit) ──
- self.rq_credit = {
-     "GenEdCommonCore":     int(data.get("기준학점_교양[최소:0/최대:0]_공통_기초", 0)),
-     "GenEdNaturalCore":    int(data.get("기준학점_교양[최소:0/최대:0]_자연_기초", 0)),
-     "GenEdAdvanced":       int(data.get("기준학점_교양[최소:0/최대:0]_심화", 0)),
-     "GenEdSpecialized":    int(data.get("기준학점_교양[최소:0/최대:0]_특성", 0)),
-     "MajorCore":           int(data.get("기준학점_전공_필수", 0)),
-     "MajorElective":       int(data.get("기준학점_전공_선택", 0)),
-     "SecondMajorCore":     int(data.get("기준학점_다전공1_필수", 0)),
-     "SecondMajorElective": int(data.get("기준학점_다전공1_선택", 0)),
- }
+        # ── 요구 학점(rq_credit) ──
+        self.rq_credit = {
+            "GenEdCommonCore":     int(data.get("기준학점_교양[최소:0/최대:0]_공통_기초", 0)),
+            "GenEdNaturalCore":    int(data.get("기준학점_교양[최소:0/최대:0]_자연_기초", 0)),
+            "GenEdAdvanced":       int(data.get("기준학점_교양[최소:0/최대:0]_심화", 0)),
+            "GenEdSpecialized":    int(data.get("기준학점_교양[최소:0/최대:0]_특성", 0)),
+            "MajorCore":           int(data.get("기준학점_전공_필수", 0)),
+            "MajorElective":       int(data.get("기준학점_전공_선택", 0)),
+            "SecondMajorCore":     int(data.get("기준학점_다전공1_필수", 0)),
+            "SecondMajorElective": int(data.get("기준학점_다전공1_선택", 0)),
+        }
 
 
-def major_prefix(self):
+
+    def major_prefix(self):
+        """주전공명으로 파일 접두어 반환."""
         m = self.major
         if m == "컴퓨터공학과": return "CP_"
         if m == "천문학과":     return "AS_"
@@ -46,7 +53,8 @@ def major_prefix(self):
         if m == "경영학과":     return "MA_"
         raise ValueError(f"지원하지 않는 전공(주전공): '{m}'")
 
-def second_major_prefix(self):
+    def second_major_prefix(self):
+        """복수전공명으로 파일 접두어 반환."""
         dm = self.doubleMajor
         if dm == "": 
             return ""
@@ -56,15 +64,17 @@ def second_major_prefix(self):
         if dm == "경영학과":     return "MA_"
         raise ValueError(f"지원하지 않는 복수전공: '{dm}'")
 
- def major_filename(self):
-     yy = 25
-     return f"{self.major_prefix()}{yy}_{self.semester}.json"
+    def major_filename(self):
+        yy = 25
+        return f"{self.major_prefix()}{yy}_{self.semester}.json"
 
- def second_major_filename(self):
-     if not self.doubleMajor:
-         return ""
-     yy = 25
-     return f"{self.second_major_prefix()}{yy}_{self.semester}.json"
+    def second_major_filename(self):
+        if not self.doubleMajor:
+            return ""
+        yy = 25
+        return f"{self.second_major_prefix()}{yy}_{self.semester}.json"
+
+
 
 # 2) Course & TimeSlot 클래스
 class TimeSlot:
@@ -120,6 +130,8 @@ class Course:
     def __repr__(self):
         return f"<Course {self.code} {self.name} ({self.category}, {self.credits}학점) [{self.raw_time}]>"
 
+
+
 # 3) 주말(토/일) 강의 제외 
 def is_weekend_course(course: Course) -> bool:
     """course.times에 '토' 또는 '일'이 하나라도 있으면 True."""
@@ -127,6 +139,7 @@ def is_weekend_course(course: Course) -> bool:
         if t.day in ("토", "일"):
             return True
     return False
+
 
 # 4) 스케줄러 함수들
 def load_courses_from_file(fname: str) -> list[Course]:
@@ -142,6 +155,7 @@ def load_courses_from_file(fname: str) -> list[Course]:
     all_courses = [Course(item) for item in arr]
     return [c for c in all_courses if not is_weekend_course(c)]
 
+
 def is_conflict(a: Course, b: Course) -> bool:
     """a, b 두 강의가 동일 요일+교시를 공유하면 True."""
     for t1 in a.times:
@@ -150,6 +164,7 @@ def is_conflict(a: Course, b: Course) -> bool:
                 return True
     return False
 
+
 def has_conflict(c: Course, scheduled: list[Course]) -> bool:
     """이미 스케줄된 강의(scheduled) 중 하나라도 c와 충돌하면 True."""
     for sc in scheduled:
@@ -157,15 +172,18 @@ def has_conflict(c: Course, scheduled: list[Course]) -> bool:
             return True
     return False
 
+
 def sum_credits(scheduled: list[Course]) -> int:
     """시간표에 들어간 모든 강의의 학점 합."""
     return sum(c.credits for c in scheduled)
+
 
 def filter_by_year_and_category(courses: list[Course], year: int, category: str) -> list[Course]:
     """
     학년(year) 또는 '전학년'(year=0)이고, 이수구분(category)이 일치하는 과목만 반환.
     """
     return [c for c in courses if (c.year == year or c.year == 0) and c.category == category]
+
 
 def select_random(candidates: list[Course], need: int) -> list[Course]:
     """
@@ -182,6 +200,7 @@ def select_random(candidates: list[Course], need: int) -> list[Course]:
         total += c.credits
     return chosen
 
+
 def schedule_major_required(student: Student, second: bool=False) -> list[Course]:
     """
     전공 필수(주전공 or 복수전공) 리스트 반환.
@@ -193,6 +212,7 @@ def schedule_major_required(student: Student, second: bool=False) -> list[Course
     all_major = load_courses_from_file(fname)
     return filter_by_year_and_category(all_major, student.grade, "전공필수")
 
+
 def schedule_major_elective(student: Student, second: bool=False) -> list[Course]:
     """
     전공 선택(주전공 or 복수전공) 리스트 반환.
@@ -203,8 +223,11 @@ def schedule_major_elective(student: Student, second: bool=False) -> list[Course
     all_major = load_courses_from_file(fname)
     return filter_by_year_and_category(all_major, student.grade, "전공선택")
 
-def schedule_general_education(student: Student) -> list[Course]:
 
+def schedule_general_education(student: Student) -> list[Course]:
+    """
+    교양 과목(공통→자연→심화→특성) 부족 학점만큼 무작위 선택하여 반환.
+    """
     schedule = []
 
     # 공통 기초
@@ -214,7 +237,7 @@ def schedule_general_education(student: Student) -> list[Course]:
         chosen = select_random(pool, need)
         schedule.extend(chosen)
 
-   # 자연 기초
+    # 자연 기초
     need = student.rq_credit["GenEdNaturalCore"] - student.cp_credit["GenEdNaturalCore"]
     if need > 0:
         pool = load_courses_from_file("GE_Natural.json")
@@ -237,8 +260,11 @@ def schedule_general_education(student: Student) -> list[Course]:
 
     return schedule
 
+
+
+# 5) main(): 전체 시간표 생성 (복수전공 + 코드 중복 제외)
 def main():
-    # 1) scraper.py로 student.json이 이미 생성됐다고 가정, student.json 사용하여 Student 클래스 초기화
+    # 1) student.json 사용하여 Student 클래스 초기화
     with open("student.json", encoding="utf-8-sig") as fp:
         student_data = json.load(fp)
     student = Student(student_data)
@@ -251,35 +277,34 @@ def main():
             break
         print("올바른 숫자(1 또는 2)를 입력해 주세요.")
 
+
     # 3) 빈 시간표 리스트 & 이미 추가된 과목코드 집합 생성
-        timetable: list[Course] = []
-        scheduled_codes: set[str] = set()
+    timetable: list[Course] = []
+    scheduled_codes: set[str] = set()
 
-
-     # ── 4-1) 주전공 전공 필수 추가 ──
-     for c in schedule_major_required(student, second=False):
-         # ① 이미 수강한 과목 필터링
-         if c.name in student.taken_courses:
-             continue
-         # ② 과목 코드 중복 필터링
-     if c.code in scheduled_codes:
-         continue
-     # ③ 시간 충돌 검사
-         if not has_conflict(c, timetable):
-             timetable.append(c)
-             scheduled_codes.add(c.code)
-
-
-    # ── 4-2) 복수전공 전공 필수 추가 (복수전공 있으면) ──
-if student.doubleMajor:
-    for c in schedule_major_required(student, second=True):
+    # ── 4-1) 주전공 전공 필수 추가 ──
+    for c in schedule_major_required(student, second=False):
+        # ① 이미 수강한 과목 필터링
         if c.name in student.taken_courses:
             continue
+        # ② 과목 코드 중복 필터링
         if c.code in scheduled_codes:
             continue
+        # ③ 시간 충돌 검사
         if not has_conflict(c, timetable):
             timetable.append(c)
             scheduled_codes.add(c.code)
+
+    # ── 4-2) 복수전공 전공 필수 추가 (복수전공 있으면) ──
+    if student.doubleMajor:
+        for c in schedule_major_required(student, second=True):
+            if c.name in student.taken_courses:
+                continue
+            if c.code in scheduled_codes:
+                continue
+            if not has_conflict(c, timetable):
+                timetable.append(c)
+                scheduled_codes.add(c.code)
 
     # ── 4-3) 교양 과목 추가 ──
     for c in schedule_general_education(student):
@@ -291,7 +316,7 @@ if student.doubleMajor:
             timetable.append(c)
             scheduled_codes.add(c.code)
 
-      # ── 4-4) 주전공 전공 선택 추가 ──
+    # ── 4-4) 주전공 전공 선택 추가 ──
     current = sum_credits(timetable)
     MIN_CR, MAX_CR = 18, 21
     if current < MIN_CR:
