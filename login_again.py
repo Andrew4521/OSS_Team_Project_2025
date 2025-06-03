@@ -47,6 +47,26 @@ while True:
         password_field.clear()
         print("다시 입력해주세요.")
 
-time.sleep(5) #로그인이 오래 걸릴 경우, 웹페이지가 닫기는 문제 해결
+time.sleep(2) #로그인이 오래 걸릴 경우, 웹페이지가 닫기는 문제 해결
+
+#2초 대기 후 otp 입력받음
+if otp_xpath_function('//*[@id="user_otpCode_login"]'):
+    otp_input = driver.find_element(By.XPATH, '//*[@id="user_otpCode_login"]')
+
+    while True:
+        otp = getpass.getpass("otp 번호를 입력해주세요 : ")
+        otp_input.send_keys(otp)
+        otp_input.send_keys(Keys.RETURN)
+
+        try:
+            if driver.current_url in ['https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko#', 'https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko#main']:
+                break
+
+        except:
+            otp_input.clear()
+            print("다시 입력해주세요")
+            continue
+
+time.sleep(5) #웹페이지 유지용
 
 driver.quit()
