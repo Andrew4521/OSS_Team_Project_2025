@@ -11,7 +11,7 @@ def main():
         return
 
     # 2) make_time_table.py 실행 → 시간표 출력
-    ret = subprocess.call([sys.executable, "make_time_table.py"])
+    ret = subprocess.call([sys.executable, "make_timetable.py"])
     if ret != 0:
         print("❌ make_time_table.py 실행 중 오류 발생.")
         return
