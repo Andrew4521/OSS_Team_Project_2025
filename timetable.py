@@ -4,11 +4,9 @@ import datetime
 import json
 import os
 
-# Initialize Pygame
 pygame.init()
-pygame.key.start_text_input()  # Enable Unicode input
+pygame.key.start_text_input()
 
-# Constants
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 GRID_TOP, GRID_LEFT = 50, 100
 GRID_WIDTH, GRID_HEIGHT = SCREEN_WIDTH - GRID_LEFT - 50, SCREEN_HEIGHT - GRID_TOP - 50
@@ -16,30 +14,28 @@ DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
 TIMES = ['8:00','9:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00']
 DATA_FILE = 'timetable_data.json'
 
-# Colors
 WHITE, BLACK, GRAY = (255,255,255),(0,0,0),(200,200,200)
 BLUE, LIGHT_BLUE, DARK_GRAY, RED = (100,149,237),(173,216,230),(50,50,50),(255,0,0)
 
-# Setup screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Timetable with Persistence")
+pygame.display.set_caption("Timetable with Scrollable Notes and Delete")
 
-# Font (Korean support)
 font = pygame.font.SysFont('malgungothic',24)
 small_font = pygame.font.SysFont('malgungothic',20)
 
-# Calculate cell size
 cell_width = GRID_WIDTH // len(DAYS)
 cell_height = GRID_HEIGHT // len(TIMES)
 
-# Sample timetable
-from timetable_detailed import timetable_detailed
-timetable = {(d['day'], d['period']): d['name'] for d in timetable_detailed}
-
-# Credentials
 VALID_USERS={'user1':'pass123','admin':'admin'}
 
-# Load saved items
+timetable = {
+    (0, 0): '수학',
+    (1, 1): '영어',
+    (2, 2): '과학',
+    (3, 3): '국어',
+    (4, 4): '사회'
+}
+
 if os.path.exists(DATA_FILE):
     with open(DATA_FILE, 'r', encoding='utf-8') as f:
         raw = json.load(f)
@@ -106,9 +102,12 @@ close_btn=None
 
 tabs = ['기본 정보', '메모', '알람']
 current_tab = 0
+scroll_offset = 0
+delete_buttons = []  # 삭제 버튼 저장
 
 def draw_overlay(cell, mouse_event=None):
-    global current_tab
+    global current_tab, delete_buttons
+    delete_buttons = []
     ox=(SCREEN_WIDTH-600)//2; oy=(SCREEN_HEIGHT-560)//2
     pygame.draw.rect(screen,DARK_GRAY,(ox,oy,600,560))
 
@@ -119,23 +118,31 @@ def draw_overlay(cell, mouse_event=None):
         if mouse_event and tab_rect.collidepoint(mouse_event.pos):
             current_tab = i
 
-    subj_name = timetable[cell]
-    info = next((d for d in timetable_detailed if d['name']==subj_name and d['day']==cell[0] and d['period']==cell[1]), None)
+    items = data_items.get(cell, [])
+    visible_area_y = oy + 80
+    visible_height = 320
+    item_height = 24
+    total_height = len(items) * item_height
 
-    if current_tab == 0 and info:
-        screen.blit(font.render(f"과목 코드: {info['code']}", True, WHITE), (ox+20, oy+80))
-        screen.blit(font.render(f"과목명: {info['name']}", True, WHITE), (ox+20, oy+120))
-        screen.blit(font.render(f"요일: {DAYS[info['day']]}", True, WHITE), (ox+20, oy+160))
-        screen.blit(font.render(f"교시: {info['period']+1}교시", True, WHITE), (ox+20, oy+200))
-        screen.blit(font.render(f"학점: {info['credit']}", True, WHITE), (ox+20, oy+240))
-    else:
-        items = data_items.get(cell, [])
+    if current_tab in [1, 2]:
+        start_y = visible_area_y + scroll_offset
         for idx, it in enumerate(items):
-            y = oy + 80 + idx * 24
-            if it[0] == 'memo' and current_tab == 1:
-                screen.blit(small_font.render(f"- {it[1]}: {it[2]}", True, WHITE), (ox + 40, y))
-            elif it[0] == 'alarm' and current_tab == 2:
-                screen.blit(small_font.render(f"- {it[2]} @ {it[1].strftime('%Y-%m-%d %H:%M')}", True, WHITE), (ox + 40, y))
+            y = start_y + idx * item_height
+            if visible_area_y <= y <= visible_area_y + visible_height:
+                if (it[0] == 'memo' and current_tab == 1) or (it[0] == 'alarm' and current_tab == 2):
+                    text = f"- {it[1]}: {it[2]}" if it[0] == 'memo' else f"- {it[2]} @ {it[1].strftime('%Y-%m-%d %H:%M')}"
+                    screen.blit(small_font.render(text, True, WHITE), (ox + 40, y))
+                    del_btn = pygame.Rect(ox + 540, y, 20, 20)
+                    pygame.draw.rect(screen, RED, del_btn)
+                    screen.blit(small_font.render("X", True, WHITE), (del_btn.x + 5, del_btn.y))
+                    delete_buttons.append((del_btn, idx))
+
+        if total_height > visible_height:
+            scrollbar_height = max(30, visible_height * visible_height // total_height)
+            scroll_pos = int((-scroll_offset) * (visible_height - scrollbar_height) / max(total_height, 1))
+            scrollbar = pygame.Rect(ox + 560, visible_area_y + scroll_pos, 10, scrollbar_height)
+            pygame.draw.rect(screen, GRAY, (ox + 560, visible_area_y, 10, visible_height))
+            pygame.draw.rect(screen, RED, scrollbar)
 
 running=True
 while running:
@@ -144,6 +151,11 @@ while running:
         if e.type==pygame.QUIT:
             save_data()
             running=False
+        elif selected_cell and e.type == pygame.MOUSEWHEEL:
+            items = data_items.get(selected_cell, [])
+            max_scroll = max(0, len(items)*24 - 320)
+            scroll_offset += e.y * 20
+            scroll_offset = max(min(scroll_offset, 0), -max_scroll)
         if not logged_in:
             user_box.handle_event(e)
             pass_box.handle_event(e)
@@ -157,6 +169,7 @@ while running:
                 row=(y-GRID_TOP)//cell_height
                 if (col,row) in timetable:
                     selected_cell=(col,row)
+                    scroll_offset = 0
                     ox=(SCREEN_WIDTH-600)//2; oy=(SCREEN_HEIGHT-560)//2
                     input_box=InputBox(ox+20,oy+400,560,40,'이름:내용 또는 이름: YYYY-MM-DD HH:MM')
                     add_btn=pygame.Rect(ox+20,oy+440,120,40)
@@ -166,6 +179,11 @@ while running:
             if e.type==pygame.MOUSEBUTTONDOWN:
                 mouse_click_event = e
                 if current_tab != 0:
+                    for btn, idx in delete_buttons:
+                        if btn.collidepoint(e.pos):
+                            if selected_cell in data_items and idx < len(data_items[selected_cell]):
+                                del data_items[selected_cell][idx]
+                                break
                     if add_btn.collidepoint(e.pos) and input_box.text:
                         text=input_box.text
                         try:
