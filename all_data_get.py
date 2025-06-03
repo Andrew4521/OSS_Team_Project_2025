@@ -21,23 +21,66 @@ driver.get("https://eis.cbnu.ac.kr/cbnuLogin")
 username_field = driver.find_element(By.NAME, "uid")
 password_field = driver.find_element(By.NAME, "pswd")
 
-id = getpass.getpass()
-pw = getpass.getpass()
+#otp 존재 유무 확인
+def otp_xpath_function(xpath):
+    try:
+        driver.find_element(By.XPATH, '//*[@id="user_otpCode_login"]')
+        return True
+    
+    except:
+        return False
 
-username_field.send_keys(f"{id}")  #실제 아이디 입력
-password_field.send_keys(f"{pw}")  #실제 비밀번호 입력
-password_field.send_keys(Keys.RETURN)  #엔터 키 입력
+#id, pw 입력
+while True:
+    id = getpass.getpass("학번 입력 : ")
+    pw = getpass.getpass("개신누리 비밀번호 입력 : ")
 
-login_xpath = '//*[@id="mainframe.login.form.btn_yes"]'
+    username_field.send_keys(f"{id}")  #실제 아이디 입력
+    password_field.send_keys(f"{pw}")  #실제 비밀번호 입력
+    password_field.send_keys(Keys.RETURN)  #엔터 키 입력
 
-try:
-    New_login = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, login_xpath)))
-    New_login.click()
+    if otp_xpath_function('//*[@id="user_otpCode_login"]') or (driver.current_url in ['https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko#', 'https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko#main']):
+        break
 
-except:
-    pass
+    else:
+        username_field.clear()
+        password_field.clear()
+        print("다시 입력해주세요.")
 
-time.sleep(5)
+time.sleep(2) #로그인이 오래 걸릴 경우, 웹페이지가 닫기는 문제 해결
+
+#2초 대기 후 otp 입력받음
+if otp_xpath_function('//*[@id="user_otpCode_login"]'):
+    otp_input = driver.find_element(By.XPATH, '//*[@id="user_otpCode_login"]')
+
+    while True:
+        otp = getpass.getpass("otp 번호를 입력해주세요 : ")
+        otp_input.send_keys(f"{otp}")
+        otp_input.send_keys(Keys.RETURN)
+
+        try:
+            if driver.current_url == 'https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko#main':
+                break
+
+            if driver.current_url == 'https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko':
+                login_xpath = '//*[@id="mainframe.login.form.btn_yes"]'
+                time.sleep(2)
+
+                try:
+                    New_login = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, login_xpath)))
+                    New_login.click()
+                    break
+
+                except:
+                    print("프로그램을 다시 실행해주세요")
+                    break
+
+        except:
+            otp_input.clear()
+            print("다시 입력해주세요")
+            continue
+
+time.sleep(5) #웹페이지 유지용
 
 #로그인 후 학점 이수 내역 페이지로 이동
 driver.get("https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko#14295")
