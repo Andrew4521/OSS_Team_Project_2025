@@ -140,8 +140,15 @@ def is_weekend_course(course: Course) -> bool:
             return True
     return False
 
+# 4) 10교시 이상인 강의 제외
+def is_invalid_time_course(course: Course) -> bool:
+    """course.times에 교시(slot)이 10 이상 있으면 True."""
+    for t in course.times:
+        if t.slot >= 10:
+            return True
+    return False
 
-# 4) 스케줄러 함수들
+# 5) 스케줄러 함수들
 def load_courses_from_file(fname: str) -> list[Course]:
     """
     JSON 배열 파일 열어서 Course 리스트로 반환.
@@ -152,8 +159,9 @@ def load_courses_from_file(fname: str) -> list[Course]:
     with open(path, encoding="utf-8") as fp:
         arr = json.load(fp)
 
-    all_courses = [Course(item) for item in arr]
-    return [c for c in all_courses if not is_weekend_course(c)]
+all_courses = [Course(item) for item in arr]
+# 주말 및 10교시 이상인 강의를 제외
+return [c for c in all_courses if not is_weekend_course(c) and not is_invalid_time_course(c)]
 
 
 def is_conflict(a: Course, b: Course) -> bool:
@@ -262,7 +270,7 @@ def schedule_general_education(student: Student) -> list[Course]:
 
 
 
-# 5) main(): 전체 시간표 생성 (복수전공 + 코드 중복 제외)
+# 6) main(): 전체 시간표 생성 (복수전공 + 코드 중복 제외)
 def main():
     # 1) student.json 사용하여 Student 클래스 초기화
     with open("student.json", encoding="utf-8-sig") as fp:
