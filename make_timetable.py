@@ -330,6 +330,8 @@ def main():
             if current >= MIN_CR:
                 break
                 continue
+            if c.name in student.taken_courses:
+                continue
             if c.code in scheduled_codes:
                 continue
             new_sum = current + c.credits
@@ -410,11 +412,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-if __name__ == "__main__":
-    main()
-
