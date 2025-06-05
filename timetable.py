@@ -11,7 +11,7 @@ SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 GRID_TOP, GRID_LEFT = 50, 100
 GRID_WIDTH, GRID_HEIGHT = SCREEN_WIDTH - GRID_LEFT - 50, SCREEN_HEIGHT - GRID_TOP - 50
 DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
-TIMES = ['8:00','9:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00']
+TIMES = ['9:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00']
 DATA_FILE = 'timetable_data.json'
 
 WHITE, BLACK, GRAY = (255,255,255),(0,0,0),(200,200,200)
@@ -103,7 +103,7 @@ close_btn=None
 tabs = ['기본 정보', '메모', '알람']
 current_tab = 0
 scroll_offset = 0
-delete_buttons = []  # 삭제 버튼 저장
+delete_buttons = []
 
 def draw_overlay(cell, mouse_event=None):
     global current_tab, delete_buttons
@@ -156,12 +156,17 @@ while running:
             max_scroll = max(0, len(items)*24 - 320)
             scroll_offset += e.y * 20
             scroll_offset = max(min(scroll_offset, 0), -max_scroll)
+
         if not logged_in:
             user_box.handle_event(e)
             pass_box.handle_event(e)
             if e.type==pygame.MOUSEBUTTONDOWN and login_btn.collidepoint(e.pos):
                 if VALID_USERS.get(user_box.text)==pass_box.text:
                     logged_in=True
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_RETURN:
+                if VALID_USERS.get(user_box.text)==pass_box.text:
+                    logged_in=True
+
         elif logged_in and selected_cell is None and e.type==pygame.MOUSEBUTTONDOWN:
             x,y=e.pos
             if GRID_LEFT<x<GRID_LEFT+GRID_WIDTH and GRID_TOP<y<GRID_TOP+GRID_HEIGHT:
@@ -201,6 +206,7 @@ while running:
                         input_box.txt_surf=font.render('',True,input_box.color)
                     if close_btn.collidepoint(e.pos):
                         selected_cell=None
+
     screen.fill(WHITE)
     if not logged_in:
         screen.blit(font.render('Login',True,BLACK),(360,150))
@@ -217,9 +223,9 @@ while running:
         for j,time in enumerate(TIMES):
             y=GRID_TOP+j*cell_height
             pygame.draw.line(screen,GRAY,(GRID_LEFT,y),(GRID_LEFT+GRID_WIDTH,y))
-            screen.blit(font.render(time,True,BLACK),(GRID_LEFT-80,y+cell_height//2-10))
+            screen.blit(font.render(time,True,BLACK),(GRID_LEFT-80,y-10))
         for (c,r),subj in timetable.items():
-            rct=pygame.Rect(GRID_LEFT+c*cell_width+1,GRID_TOP+r*cell_height+1,cell_width-2,cell_height-2)
+            rct=pygame.Rect(GRID_LEFT+c*cell_width+1,GRID_TOP+r*cell_height,cell_width-2,cell_height)
             pygame.draw.rect(screen,BLUE,rct)
             screen.blit(font.render(subj,True,WHITE),(rct.x+5,rct.y+5))
         if selected_cell:
