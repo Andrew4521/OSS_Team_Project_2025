@@ -159,9 +159,9 @@ def load_courses_from_file(fname: str) -> list[Course]:
     with open(path, encoding="utf-8") as fp:
         arr = json.load(fp)
 
-all_courses = [Course(item) for item in arr]
-# 주말 및 10교시 이상인 강의를 제외
-return [c for c in all_courses if not is_weekend_course(c) and not is_invalid_time_course(c)]
+    all_courses = [Course(item) for item in arr]
+    # 주말 및 10교시 이상인 강의를 제외
+    return [c for c in all_courses if not is_weekend_course(c) and not is_invalid_time_course(c)]
 
 
 def is_conflict(a: Course, b: Course) -> bool:
