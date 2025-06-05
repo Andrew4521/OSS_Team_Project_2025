@@ -268,7 +268,15 @@ def schedule_general_education(student: Student) -> list[Course]:
 
     return schedule
 
-
+def schedule_bastion(student: Student) -> list[Course]:
+    """
+    GE_BASTION.json 파일에서 후보를 뽑아 반환.
+    """
+    try:
+        pool = load_courses_from_file("GE_BASTION.json")
+    except FileNotFoundError:
+        return []
+    return pool
 
 # 6) main(): 전체 시간표 생성 (복수전공 + 코드 중복 제외)
 def main():
@@ -366,6 +374,26 @@ def main():
             if current >= MIN_CR:
                 break
 
+    # ── 4-6) BASTION으로 부족 학점 채우기 ──
+    if current < MIN_CR:
+        bastion_candidates = schedule_bastion(student)
+        random.shuffle(bastion_candidates)
+        for c in bastion_candidates:
+            if current >= MIN_CR:
+                break
+            if c.name in student.taken_courses:
+                continue
+            if c.code in scheduled_codes:
+                continue
+            new_sum = current + c.credits
+            if new_sum > MAX_CR:
+                continue
+            if has_conflict(c, timetable):
+                continue
+            timetable.append(c)
+            scheduled_codes.add(c.code)
+            current = new_sum
+    
     # 5) 최종 시간표 출력
     print("\n=== 생성된 시간표 ===\n")
     for c in timetable:
