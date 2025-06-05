@@ -268,6 +268,7 @@ def schedule_general_education(student: Student) -> list[Course]:
 
     return schedule
 
+# 최후의 보루
 def schedule_bastion(student: Student) -> list[Course]:
     """
     GE_BASTION.json 파일에서 후보를 뽑아 반환.
@@ -278,14 +279,14 @@ def schedule_bastion(student: Student) -> list[Course]:
         return []
     return pool
 
-# 6) main(): 전체 시간표 생성 (복수전공 + 코드 중복 제외)
+# 6) main(): 전체 시간표 생성 
 def main():
-    # 1) student.json 사용하여 Student 클래스 초기화
+    # 1) student.json 열어 Student 초기화
     with open("student.json", encoding="utf-8-sig") as fp:
         student_data = json.load(fp)
     student = Student(student_data)
 
-    # 2) “학기 선택” 
+    # 2) 학기 선택 입력
     while True:
         term = input("현재 학기를 선택하세요 (1 또는 2): ").strip()
         if term in ("1", "2"):
@@ -293,26 +294,23 @@ def main():
             break
         print("올바른 숫자(1 또는 2)를 입력해 주세요.")
 
-
-    # 3) 빈 시간표 리스트 & 이미 추가된 과목코드 집합 생성
+    # 3) 빈 시간표 & 이미 추가된 과목코드 집합 생성
     timetable: list[Course] = []
     scheduled_codes: set[str] = set()
 
-    # ── 4-1) 주전공 전공 필수 추가 ──
-    for c in schedule_major_required(student, second=False):
-        # ① 이미 수강한 과목 필터링
-        if c.name in student.taken_courses:
-            continue
-        # ② 과목 코드 중복 필터링
-        if c.code in scheduled_codes:
-            continue
-        # ③ 시간 충돌 검사
-        if not has_conflict(c, timetable):
-            timetable.append(c)
-            scheduled_codes.add(c.code)
+    # ── 4-1) 주전공 전공 필수 추가  ──
+    if student.cp_credit["MajorCore"] < student.rq_credit["MajorCore"]:
+        for c in schedule_major_required(student, second=False):
+            if c.name in student.taken_courses:
+                continue
+            if c.code in scheduled_codes:
+                continue
+            if not has_conflict(c, timetable):
+                timetable.append(c)
+                scheduled_codes.add(c.code)
 
-    # ── 4-2) 복수전공 전공 필수 추가 (복수전공 있으면) ──
-    if student.doubleMajor:
+    # ── 4-2) 복수전공 전공 필수 추가 (필요할 때만) ──
+    if student.doubleMajor and student.cp_credit["SecondMajorCore"] < student.rq_credit["SecondMajorCore"]:
         for c in schedule_major_required(student, second=True):
             if c.name in student.taken_courses:
                 continue
@@ -322,23 +320,34 @@ def main():
                 timetable.append(c)
                 scheduled_codes.add(c.code)
 
-    # ── 4-3) 교양 과목 추가 ──
-    for c in schedule_general_education(student):
-        if c.name in student.taken_courses:
-            continue
-        if c.code in scheduled_codes:
-            continue
-        if not has_conflict(c, timetable):
-            timetable.append(c)
-            scheduled_codes.add(c.code)
-
-    # ── 4-4) 주전공 전공 선택 추가 ──
+    # ── 4-3) 교양 추가 (필요할 때만) ──
     current = sum_credits(timetable)
     MIN_CR, MAX_CR = 18, 21
     if current < MIN_CR:
+        gen_candidates = schedule_general_education(student)
+        random.shuffle(gen_candidates)
+        for c in gen_candidates:
+            if current >= MIN_CR:
+                break
+                continue
+            if c.code in scheduled_codes:
+                continue
+            new_sum = current + c.credits
+            if new_sum > MAX_CR:
+                continue
+            if has_conflict(c, timetable):
+                continue
+            timetable.append(c)
+            scheduled_codes.add(c.code)
+            current = new_sum
+
+    # ── 4-4) 주전공 전공 선택 추가  ──
+    if student.cp_credit["MajorElective"] < student.rq_credit["MajorElective"] and current < MIN_CR:
         candidates = schedule_major_elective(student, second=False)
         random.shuffle(candidates)
         for c in candidates:
+            if current >= MIN_CR:
+                break
             if c.name in student.taken_courses:
                 continue
             if c.code in scheduled_codes:
@@ -351,14 +360,14 @@ def main():
             timetable.append(c)
             scheduled_codes.add(c.code)
             current = new_sum
-            if current >= MIN_CR:
-                break
 
-    # ── 4-5) 복수전공 전공 선택 추가 (복수전공 있으면 + 필요시) ──
-    if student.doubleMajor and current < MIN_CR:
+    # ── 4-5) 복수전공 전공 선택 추가 (필요할 때만) ──
+    if student.doubleMajor and student.cp_credit["SecondMajorElective"] < student.rq_credit["SecondMajorElective"] and current < MIN_CR:
         candidates = schedule_major_elective(student, second=True)
         random.shuffle(candidates)
         for c in candidates:
+            if current >= MIN_CR:
+                break
             if c.name in student.taken_courses:
                 continue
             if c.code in scheduled_codes:
@@ -371,8 +380,6 @@ def main():
             timetable.append(c)
             scheduled_codes.add(c.code)
             current = new_sum
-            if current >= MIN_CR:
-                break
 
     # ── 4-6) BASTION으로 부족 학점 채우기 ──
     if current < MIN_CR:
@@ -393,12 +400,19 @@ def main():
             timetable.append(c)
             scheduled_codes.add(c.code)
             current = new_sum
-    
+            
     # 5) 최종 시간표 출력
     print("\n=== 생성된 시간표 ===\n")
     for c in timetable:
         print(f"{c.code} {c.name} ({c.category}, {c.credits}학점) → {c.raw_time}")
     print(f"\n총 학점: {sum_credits(timetable)}\n")
+
+
+if __name__ == "__main__":
+    main()
+
+
+
 
 
 if __name__ == "__main__":
