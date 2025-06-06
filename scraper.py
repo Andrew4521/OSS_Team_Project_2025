@@ -8,7 +8,6 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import getpass
 from selenium.webdriver.common.action_chains import ActionChains
 import pyautogui
 import json
@@ -24,8 +23,8 @@ driver.get("https://eis.cbnu.ac.kr/cbnuLogin")
 username_field = driver.find_element(By.NAME, "uid")
 password_field = driver.find_element(By.NAME, "pswd")
 
-id = getpass.getpass("학번: ")
-pw = getpass.getpass("비밀번호: ")
+id = input("학번: ")
+pw = input("비밀번호: ")
 
 username_field.send_keys(id)
 password_field.send_keys(pw)
@@ -58,6 +57,8 @@ majors = {
 
 try:
     time.sleep(2)
+    for i in range(7):
+        pyautogui.hotkey('ctrl', '-') 
     for i in ["11","12","05","03","16"]: #데이터 가져와 위 딕셔너리에 저장
         element = WebDriverWait(driver, 30).until(
         EC.visibility_of_element_located((By.XPATH, f'//*[@id="mainframe.WrapFrame.form.div_section.form.div_content.form.div_work.form.w_14295.form.div_work.form.tab_main.tpg_1.form.div_detail.form.edt_txt{i}:input"]'))
