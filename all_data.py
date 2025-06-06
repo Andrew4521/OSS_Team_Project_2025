@@ -35,14 +35,15 @@ while True:
     id = getpass.getpass("학번 입력 : ")
     pw = getpass.getpass("개신누리 비밀번호 입력 : ")
 
-    username_field.send_keys(f"{id}")  #실제 아이디 입력
-    password_field.send_keys(f"{pw}")  #실제 비밀번호 입력
-    password_field.send_keys(Keys.RETURN)  #엔터 키 입력
+    try:
+        username_field.send_keys(f"{id}")  #실제 아이디 입력
+        password_field.send_keys(f"{pw}")  #실제 비밀번호 입력
+        password_field.send_keys(Keys.RETURN)  #엔터 키 입력
+        
+        if driver.current_url in ['https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko#main','https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko']:
+            break
 
-    if otp_xpath_function('//*[@id="user_otpCode_login"]') or (driver.current_url in ['https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko#', 'https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko#main']):
-        break
-
-    else:
+    except:
         username_field.clear()
         password_field.clear()
         print("다시 입력해주세요.")
