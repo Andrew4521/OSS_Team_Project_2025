@@ -84,6 +84,9 @@ time.sleep(5) #웹페이지 유지용
 
 #로그인 후 학점 이수 내역 페이지로 이동
 driver.get("https://eisn.cbnu.ac.kr/nxui/index.html?OBSC_YN=0&LNG=ko#14295")
+time.sleep(1)
+for i in range(7):
+    pyautogui.hotkey('ctrl', '-')
 
 majors = {
     "학년":"",
