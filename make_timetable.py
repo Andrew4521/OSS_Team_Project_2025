@@ -286,14 +286,9 @@ def main():
         student_data = json.load(fp)
     student = Student(student_data)
 
-    # 2) 학기 선택 입력
-    while True:
-        term = input("현재 학기를 선택하세요 (1 또는 2): ").strip()
-        if term in ("1", "2"):
-            student.semester = int(term)
-            break
-        print("올바른 숫자(1 또는 2)를 입력해 주세요.")
-
+    # 2) 학기 1학기로 설정
+    student.semester = 1
+         
     # 3) 빈 시간표 & 이미 추가된 과목코드 집합 생성
     timetable: list[Course] = []
     scheduled_codes: set[str] = set()
