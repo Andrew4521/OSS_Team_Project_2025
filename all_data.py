@@ -10,6 +10,14 @@ import getpass
 from selenium.webdriver.common.action_chains import ActionChains
 import pyautogui
 
+def login_xpath_function():
+    try:
+        driver.find_element(By.XPATH, '//*[@id="mainframe.login.form.btn_yes"]')
+        return True
+    
+    except:
+        return False
+
 #최신 버전 크롬에 맞는 크롬드라이버 설치
 service = Service(ChromeDriverManager(driver_version="136.0.7103.49").install())
 driver = webdriver.Chrome(service=service)
@@ -27,10 +35,6 @@ pw = getpass.getpass("개신누리 비밀번호 입력 : ")
 username_field.send_keys(f"{id}")  #실제 아이디 입력
 password_field.send_keys(f"{pw}")  #실제 비밀번호 입력
 password_field.send_keys(Keys.RETURN)  #엔터 키 입력
-        
-otp = getpass.getpass("otp 번호를 입력해주세요 : ")
-otp_input.send_keys(f"{otp}")
-otp_input.send_keys(Keys.RETURN)
 
 if login_xpath_function():
     login_xpath = '//*[@id="mainframe.login.form.btn_yes"]'
