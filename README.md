@@ -36,7 +36,7 @@
 설치 중에는 “Add Python to PATH” 옵션을 반드시 체크해야 함.
 
 ## ✏️ 실행 방법
-1. converter_run_all_final.py 실행
+1. Main.py 실행
 2. 팝업창으로 나온 GUI에 학번과 비밀번호 입력 후 Login 버튼 클릭
 3. 일정 시간 대기 시 콘솔 창과 GUI로 시간표 제작 결과가 출력됨
 
